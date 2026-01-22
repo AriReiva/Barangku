@@ -146,3 +146,4 @@ D:\8.0 Bentang\Barangku\obj\Debug\net8.0\refint\Barangku.dll
 D:\8.0 Bentang\Barangku\obj\Debug\net8.0\Barangku.pdb
 D:\8.0 Bentang\Barangku\obj\Debug\net8.0\Barangku.genruntimeconfig.cache
 D:\8.0 Bentang\Barangku\obj\Debug\net8.0\ref\Barangku.dll
+D:\8.0 Bentang\Barangku\obj\Debug\net8.0\Barangku.sourcelink.json

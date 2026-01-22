@@ -1,0 +1,19 @@
+@page "/logout"
+@rendermode InteractiveServer
+
+@using Barangku.State
+@inject AuthState AuthState
+@inject NavigationManager Navigation
+
+<h3>Logging out...</h3>
+
+@code {
+    protected override void OnInitialized()
+    {
+        // Clear auth state
+        AuthState.ClearAuthState();
+
+        // Redirect ke login (force reload)
+        Navigation.NavigateTo("/login", true);
+    }
+}
