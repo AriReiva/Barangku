@@ -33,17 +33,22 @@
                 </a>
             </div>
 
-            <div class="nav-item px-3">
-                <a class="nav-link text-white" href="/produk">
-                    <i class="bi bi-box-seam-fill me-2"></i> Produk
-                </a>
-            </div>
-
-            <div class="nav-item px-3">
-                <a class="nav-link text-white" href="/transaksi">
-                    <i class="bi bi-receipt me-2"></i> Transaksi
-                </a>
-            </div>
+            @if(@AuthState.CurrentUser?.Role == "Admin" )
+            {
+                <div class="nav-item px-3">
+                    <a class="nav-link text-white" href="/produk">
+                        <i class="bi bi-box-seam-fill me-2"></i> Produk
+                    </a>
+                </div>
+            }
+            
+            @if(@AuthState.CurrentUser?.Role == "Kasir"){
+                <div class="nav-item px-3">
+                    <a class="nav-link text-white" href="/transaksi">
+                        <i class="bi bi-receipt me-2"></i> Transaksi
+                    </a>
+                </div>
+            }
         </nav>
 
         <div class="px-3 py-3 border-top border-secondary">

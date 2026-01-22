@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Barangku")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2754f121280a4b316b783b88c5e3eb1571d4cd3e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8737933a1d755b2ee6a82a460e9635e0c59804ef")]
 [assembly: System.Reflection.AssemblyProductAttribute("Barangku")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Barangku")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
