@@ -1,0 +1,116 @@
+@page "/login"
+@rendermode InteractiveServer
+@using Barangku.Model.DTO
+@using Barangku.Model.ViewModel
+@inject Barangku.Service.Interface.IAuthService AuthService
+@inject Barangku.State.AuthState AuthState
+@inject NavigationManager NavigationManager
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">Login</h3>
+
+                    <EditForm Model="@loginModel" OnValidSubmit="HandleLogin" FormName="loginForm">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger" />
+
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <InputText type="email" class="form-control" @bind-Value="loginModel.Email" placeholder="Enter your email" />
+                            <ValidationMessage For="@(() => loginModel.Email)" class="text-danger" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <InputText type="password" class="form-control" @bind-Value="loginModel.Password" placeholder="Enter your password" />
+                            <ValidationMessage For="@(() => loginModel.Password)" class="text-danger" />
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100" disabled="@isLoggingIn">
+                            @(isLoggingIn ? "Logging in..." : "Login")
+                        </button>
+                    </EditForm>
+
+                    @if (!string.IsNullOrEmpty(message))
+                    {
+                        <div class="alert alert-danger mt-3">@message</div>
+                    }
+
+                    <div class="text-center mt-3">
+                        <p>Don't have an account? <a href="/register">Register here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private LoginVM loginModel { get; set; } = new();
+    
+    private string message = string.Empty;
+    private bool isLoggingIn = false;
+
+    protected override void OnInitialized()
+    {
+        if (AuthState.IsAuthenticated())
+        {
+            NavigationManager.NavigateTo("/", forceLoad: true);
+        }
+    }
+
+
+    private async Task HandleLogin()
+    {
+        isLoggingIn = true;
+        message = string.Empty;
+
+        try
+        {
+            // Validasi input
+            if (string.IsNullOrWhiteSpace(loginModel.Email) || 
+                string.IsNullOrWhiteSpace(loginModel.Password))
+            {
+                message = "Email and password are required.";
+                isLoggingIn = false;
+                Console.WriteLine("Validation failed - empty fields");
+                return;
+            }
+
+            var dto = new LoginDto
+            {
+                Email = loginModel.Email.Trim(),
+                Password = loginModel.Password
+            };
+            
+            // Panggil service - LoginAsync return (token, user) langsung
+            var (token, user) = await AuthService.LoginAsync(dto);
+
+            if (!string.IsNullOrEmpty(token) && user != null)
+            {
+                AuthState.SetAuthState(user, token);
+                NavigationManager.NavigateTo("/", forceLoad: true);
+            }
+            else
+            {
+                message = "Failed to login.";
+                isLoggingIn = false;
+            }
+        }
+        catch (Microsoft.AspNetCore.Components.NavigationException)
+        {
+            // Ignore navigation exception
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Login error: {ex.Message}"); 
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            message = ex.Message;
+            isLoggingIn = false;
+        }
+    }
+}

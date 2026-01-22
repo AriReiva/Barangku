@@ -1,0 +1,286 @@
+@page "/transaksi"
+@rendermode InteractiveServer
+
+@using Barangku.Model.ViewModel
+@using Barangku.Model.DTO
+@using Barangku.State
+@using Barangku.Service.Interface
+
+@inject TransaksiState TransaksiState
+@inject ITransaksiService TransaksiService
+@inject IProdukService ProdukService
+@inject IAuthService AuthService
+@inject AuthState AuthState
+@inject NavigationManager Navigation
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-primary mb-0">
+            <i class="bi bi-cart-check me-2"></i>Transaksi POS
+        </h2>
+        <small class="text-muted">@DateTime.Now.ToString("dddd, dd MMMM yyyy HH:mm")</small>
+    </div>
+
+    <div class="row g-4">
+        <!-- PRODUK SECTION -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="bi bi-box-seam text-primary me-2"></i>Daftar Produk
+                    </h5>
+                </div>
+
+                <div class="card-body p-0">
+                    @if (produkList == null)
+                    {
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary mb-3" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="text-muted fw-medium">Memuat produk...</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="fw-semibold text-uppercase small px-4 py-3">Nama Produk</th>
+                                        <th class="fw-semibold text-uppercase small py-3">Harga</th>
+                                        <th class="fw-semibold text-uppercase small py-3 text-center">Stok</th>
+                                        <th class="fw-semibold text-uppercase small py-3 text-center px-4">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var p in produkList)
+                                    {
+                                        <tr>
+                                            <td class="px-4 py-3">
+                                                <div class="fw-medium">@p.Nama</div>
+                                            </td>
+                                            <td class="py-3">
+                                                <span class="fw-bold text-success">Rp @p.Harga.ToString("N0")</span>
+                                            </td>
+                                            <td class="py-3 text-center">
+                                                @if (p.Stok > 10)
+                                                {
+                                                    <span class="badge bg-success bg-opacity-10 text-success fw-medium px-3 py-2">@p.Stok</span>
+                                                }
+                                                else if (p.Stok > 0)
+                                                {
+                                                    <span class="badge bg-warning bg-opacity-10 text-warning fw-medium px-3 py-2">@p.Stok</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger bg-opacity-10 text-danger fw-medium px-3 py-2">Habis</span>
+                                                }
+                                            </td>
+                                            <td class="py-3 text-center px-4">
+                                                <button class="btn btn-primary btn-sm px-3"
+                                                        disabled="@(p.Stok <= 0)"
+                                                        @onclick="() => TambahProduk(p)">
+                                                    <i class="bi bi-plus-lg me-1"></i>Tambah
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- KERANJANG SECTION -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-primary bg-opacity-10 border-bottom py-3">
+                    <h5 class="mb-0 fw-semibold text-primary">
+                        <i class="bi bi-cart3 me-2"></i>Keranjang Belanja
+                    </h5>
+                </div>
+
+                <div class="card-body">
+                    @if (!TransaksiState.Items.Any())
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-cart-x fs-1 text-muted opacity-50 d-block mb-3"></i>
+                            <p class="text-muted fw-medium mb-0">Keranjang masih kosong</p>
+                            <small class="text-muted">Tambahkan produk untuk memulai transaksi</small>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive mb-3">
+                            <table class="table table-sm align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="fw-semibold small py-2">Produk</th>
+                                        <th class="fw-semibold small py-2 text-center">Qty</th>
+                                        <th class="fw-semibold small py-2 text-end">Harga</th>
+                                        <th class="fw-semibold small py-2 text-end">Subtotal</th>
+                                        <th class="fw-semibold small py-2 text-center"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in TransaksiState.Items)
+                                    {
+                                        <tr>
+                                            <td class="py-2">
+                                                <small class="fw-medium">@GetNamaProduk(item.ProdukId)</small>
+                                            </td>
+                                            <td class="py-2 text-center">
+                                                <span class="badge bg-primary bg-opacity-10 text-primary">@item.Jumlah</span>
+                                            </td>
+                                            <td class="py-2 text-end">
+                                                <small class="text-muted">@item.Harga.ToString("N0")</small>
+                                            </td>
+                                            <td class="py-2 text-end">
+                                                <small class="fw-bold text-success">@item.Subtotal.ToString("N0")</small>
+                                            </td>
+                                            <td class="py-2 text-center">
+                                                <button class="btn btn-sm btn-danger px-2 py-1"
+                                                        @onclick="() => TransaksiState.RemoveItem(item.ProdukId)">
+                                                    <i class="bi bi-trash">Delete</i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+
+                    <hr class="my-3" />
+
+                    <EditForm Model="vm" OnValidSubmit="SimpanTransaksi">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="alert alert-danger alert-sm" />
+
+                        <div class="bg-light rounded-3 p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted fw-medium">Total Belanja</span>
+                                <h4 class="mb-0 fw-bold text-primary">Rp @vm.Total.ToString("N0")</h4>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small text-uppercase">
+                                <i class="bi bi-cash me-1"></i>Jumlah Bayar
+                            </label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-white">Rp</span>
+                                <InputNumber class="form-control" @bind-Value="vm.Bayar" placeholder="0" />
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small text-uppercase">
+                                <i class="bi bi-wallet2 me-1"></i>Kembalian
+                            </label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-light">Rp</span>
+                                <InputNumber class="form-control bg-light" @bind-Value="vm.Kembali" readonly />
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button class="btn btn-success btn-lg fw-semibold py-3"
+                                    disabled="@(!TransaksiState.Items.Any())">
+                                <i class="bi bi-check-circle me-2"></i>Proses Transaksi
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.05);
+        cursor: pointer;
+    }
+    
+    .btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+</style>
+
+@code {
+    List<ProdukVM>? produkList;
+    CreateTransaksiVM vm = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated())
+        {
+            Navigation.NavigateTo("/login", forceLoad: true);
+            return;
+        }
+        produkList = await ProdukService.GetAllProdukAsync();
+
+        var user = await AuthService.GetUserByEmailAsync(
+            AuthState.CurrentUser?.Email
+        );
+
+        vm.UserId = user.Id;
+    }
+
+    void TambahProduk(ProdukVM p)
+    {
+        TransaksiState.AddItem(new AddDetailTransaksiVM
+        {
+            ProdukId = p.Id,
+            Jumlah = 1,
+            Harga = p.Harga
+        });
+
+        RefreshTotal();
+    }
+
+
+    void RefreshTotal()
+    {
+        vm.Total = TransaksiState.Total;
+        vm.Details = TransaksiState.Items.ToList();
+
+        if (vm.Bayar >= vm.Total)
+            vm.Kembali = vm.Bayar - vm.Total;
+    }
+
+    async Task SimpanTransaksi()
+    {
+        vm.Details = TransaksiState.Items.ToList();
+
+        var dto = new CreateTransaksiDto
+        {
+            UserId = vm.UserId,
+            Total = vm.Total,
+            Bayar = vm.Bayar,
+            Kembali = vm.Kembali,
+            Details = vm.Details.Select(d => new DetailTranskasiDto
+            {
+                ProdukId = d.ProdukId,
+                Jumlah = d.Jumlah,
+                Harga = d.Harga,
+                Subtotal = d.Subtotal
+            }).ToList()
+        };
+
+        await TransaksiService.CreateTransaksiAsync(dto);
+
+        TransaksiState.Clear();
+        vm = new CreateTransaksiVM { UserId = vm.UserId };
+
+        Navigation.NavigateTo("/transaksi", true);
+    }
+
+    string GetNamaProduk(int id)
+        => produkList?.FirstOrDefault(p => p.Id == id)?.Nama ?? "-";
+}

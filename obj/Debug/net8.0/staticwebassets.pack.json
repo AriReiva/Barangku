@@ -1,0 +1,41 @@
+{
+  "Files": [
+    {
+      "Id": "D:\\8.0 Bentang\\Barangku\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\Barangku.bundle.scp.css",
+      "PackagePath": "staticwebassets\\Barangku.bundle.scp.css"
+    },
+    {
+      "Id": "D:\\8.0 Bentang\\Barangku\\wwwroot\\app.css",
+      "PackagePath": "staticwebassets\\app.css"
+    },
+    {
+      "Id": "D:\\8.0 Bentang\\Barangku\\wwwroot\\bootstrap\\bootstrap.min.css",
+      "PackagePath": "staticwebassets\\bootstrap\\bootstrap.min.css"
+    },
+    {
+      "Id": "D:\\8.0 Bentang\\Barangku\\wwwroot\\bootstrap\\bootstrap.min.css.map",
+      "PackagePath": "staticwebassets\\bootstrap\\bootstrap.min.css.map"
+    },
+    {
+      "Id": "D:\\8.0 Bentang\\Barangku\\wwwroot\\favicon.png",
+      "PackagePath": "staticwebassets\\favicon.png"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.Barangku.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.Barangku.props",
+      "PackagePath": "build\\Barangku.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.Barangku.props",
+      "PackagePath": "buildMultiTargeting\\Barangku.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.Barangku.props",
+      "PackagePath": "buildTransitive\\Barangku.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

@@ -1,0 +1,67 @@
+﻿@using Barangku.State
+@inject AuthState AuthState
+@inject NavigationManager Navigation
+
+<div class="navbar navbar-expand-lg navbar-dark bg-dark position-sticky top-0 shadow">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="">
+            <i class="bi bi-shop me-2"></i>
+            Barangku
+        </a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable bg-dark d-flex flex-column" style="height: calc(100vh - 56px);">
+    @if (AuthState.IsAuthenticated())
+    {
+        <div class="px-3 py-3 border-bottom border-secondary">
+            <div class="text-white">
+                <i class="bi bi-person-circle me-2"></i>
+                <span>@AuthState.CurrentUser?.Username</span>
+            </div>
+            @if (!string.IsNullOrEmpty(AuthState.CurrentUser?.Email))
+            {
+                <div class="text-white-50 small ms-4">
+                    @AuthState.CurrentUser?.Email
+                </div>
+            }
+        </div>
+
+        <nav class="flex-column flex-grow-1">
+            <div class="nav-item px-3">
+                <NavLink class="nav-link text-white" href="" Match="NavLinkMatch.All">
+                    <i class="bi bi-house-door-fill me-2"></i> Home
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link text-white" href="produk">
+                    <i class="bi bi-box-seam-fill me-2"></i> Produk
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link text-white" href="transaksi">
+                    <i class="bi bi-receipt me-2"></i> Transaksi
+                </NavLink>
+            </div>
+        </nav>
+
+        <div class="px-3 py-3 border-top border-secondary">
+            <button class="btn btn-danger w-100" @onclick="Logout">
+                <i class="bi bi-box-arrow-right me-1"></i>
+                Logout
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    private void Logout()
+    {
+        AuthState.ClearAuthState();
+        Navigation.NavigateTo("/login", true);
+    }
+}

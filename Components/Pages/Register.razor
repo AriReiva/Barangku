@@ -1,0 +1,96 @@
+@page "/register"
+@rendermode InteractiveServer
+@using Barangku.Model.ViewModel
+@using Barangku.Model.DTO
+@inject Barangku.Service.Interface.IAuthService AuthService
+@inject NavigationManager NavigationManager
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">Register</h3>
+
+                    <EditForm Model="@registerModel" OnValidSubmit="SaveRegister" FormName="registerForm">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger" />
+
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <InputText class="form-control" @bind-Value="registerModel.Username" placeholder="Enter username" />
+                            <ValidationMessage For="@(() => registerModel.Username)" class="text-danger" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <InputText type="email" class="form-control" @bind-Value="registerModel.Email" placeholder="Enter email" />
+                            <ValidationMessage For="@(() => registerModel.Email)" class="text-danger" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <InputText type="password" class="form-control" @bind-Value="registerModel.Password" placeholder="Enter password" />
+                            <ValidationMessage For="@(() => registerModel.Password)" class="text-danger" />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100" disabled="@isSaving">
+                            @(isSaving ? "Menyimpan..." : "Register")
+                        </button>
+                    </EditForm>
+
+                    @if (!string.IsNullOrEmpty(message))
+                    {
+                        <div class="alert alert-danger mt-3">@message</div>
+                    }
+
+                    <div class="text-center mt-3">
+                        <p>Already have an account? <a href="/login">Login here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private RegisterVM registerModel { get; set; } = new();
+    
+    private string message = string.Empty;
+    private bool isSaving = false;
+
+    private async Task SaveRegister()
+    {
+        isSaving = true;
+        message = "";
+
+        try
+        {
+            // Mapping frontend model ke DTO
+            var dto = new RegisterDto
+            {
+                Username = registerModel.Username,
+                Email = registerModel.Email,
+                Password = registerModel.Password
+            };
+
+            // Panggil service
+            var user = await AuthService.RegisterAsync(dto);
+
+            // Redirect ke login setelah sukses
+            NavigationManager.NavigateTo("/login", forceLoad: true);
+        }
+        catch (Microsoft.AspNetCore.Components.NavigationException)
+        {
+            // Ini normal behavior dari NavigateTo dengan forceLoad
+            // Abaikan exception ini
+        }
+        catch (Exception ex)
+        {
+            // Tampilkan error dari service
+            message = ex.Message;
+            isSaving = false;
+        }
+    }
+}

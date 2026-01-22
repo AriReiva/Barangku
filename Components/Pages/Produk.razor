@@ -1,0 +1,350 @@
+@page "/produk"
+@rendermode InteractiveServer
+@using Barangku.Model.ViewModel
+@using Barangku.Model.DTO
+@using Barangku.Service.Interface
+@inject IProdukService ProdukService
+@using Barangku.State
+@inject ProdukState ProdukState
+@inject AuthState AuthState
+@inject NavigationManager Navigation
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold mb-1">
+                        <i class="bi bi-box-seam me-2 text-primary"></i>
+                        Daftar Produk
+                    </h2>
+                    <p class="text-muted mb-0">Kelola semua produk Anda</p>
+                </div>
+                <button class="btn btn-primary" @onclick="ShowCreateForm">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Tambah Produk
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nama Produk</th>
+                            <th>Deskripsi</th>
+                            <th>Harga</th>
+                            <th>Stok</th>
+                            <th class="text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ProdukState.Produks.Any())
+                        {
+                            @foreach (var produk in ProdukState.Produks)
+                            {
+                                <tr>
+                                    <td class="align-middle">
+                                        <span class="badge bg-secondary">#@produk.Id</span>
+                                    </td>
+                                    <td class="align-middle fw-semibold">@produk.Nama</td>
+                                    <td class="align-middle text-muted">@produk.Deskripsi</td>
+                                    <td class="align-middle">
+                                        <span class="text-success fw-bold">
+                                            Rp @produk.Harga.ToString("N0")
+                                        </span>
+                                    </td>
+                                    <td class="align-middle">
+                                        <span class="badge @(produk.Stok > 10 ? "bg-success" : produk.Stok > 0 ? "bg-warning" : "bg-danger")">
+                                            @produk.Stok unit
+                                        </span>
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-warning" @onclick="() => ShowEditForm(produk)" title="Edit">
+                                                <i class="bi bi-pencil-square">Edit</i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" @onclick="() => ShowDeleteModal(produk.Id)" title="Hapus">
+                                                <i class="bi bi-trash">Delete</i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                    <p class="mb-0">Belum ada produk. Tambahkan produk pertama Anda!</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if(showModal)
+{
+    <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-@((isEditMode) ? "pencil-square" : "plus-circle") me-2"></i>
+                        @((isEditMode) ? "Edit Produk" : "Tambah Produk")
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="() => showModal = false"></button>
+                </div>
+                <div class="modal-body">
+                    @if(!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            @errorMessage
+                            <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+                        </div>
+                    }
+                    <EditForm Model="@ProdukModel">
+                        <div class="mb-3">
+                            <label for="nama" class="form-label fw-semibold">
+                                <i class="bi bi-tag me-1"></i>
+                                Nama Produk
+                            </label>
+                            <InputText id="nama" class="form-control" @bind-Value="ProdukModel.Nama" placeholder="Masukkan nama produk" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="deskripsi" class="form-label fw-semibold">
+                                <i class="bi bi-text-paragraph me-1"></i>
+                                Deskripsi
+                            </label>
+                            <InputTextArea id="deskripsi" class="form-control" @bind-Value="ProdukModel.Deskripsi" rows="3" placeholder="Masukkan deskripsi produk" />
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="harga" class="form-label fw-semibold">
+                                    <i class="bi bi-currency-dollar me-1"></i>
+                                    Harga
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">Rp</span>
+                                    <InputNumber id="harga" class="form-control" @bind-Value="ProdukModel.Harga" placeholder="0" />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="stok" class="form-label fw-semibold">
+                                    <i class="bi bi-box me-1"></i>
+                                    Stok
+                                </label>
+                                <InputNumber id="stok" class="form-control" @bind-Value="ProdukModel.Stok" placeholder="0" />
+                            </div>
+                        </div>
+                    </EditForm>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="() => showModal = false">
+                        <i class="bi bi-x-circle me-1"></i>
+                        Batal
+                    </button>
+                    <button class="btn btn-primary" disabled="@isSaving" @onclick="SaveProduk">
+                        @if(isSaving)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                            <span>Menyimpan...</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-check-circle me-1"></i>
+                            <span>Simpan</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if(showDeleteModal)
+{
+    <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Konfirmasi Hapus
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="() => showDeleteModal = false"></button>
+                </div>
+                <div class="modal-body">
+                    @if(!string.IsNullOrEmpty(deleteErrorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            @deleteErrorMessage
+                            <button type="button" class="btn-close" @onclick="() => deleteErrorMessage = string.Empty"></button>
+                        </div>
+                    }
+                    <div class="text-center py-3">
+                        <i class="bi bi-trash fs-1 text-danger mb-3 d-block"></i>
+                        <p class="mb-0 fs-5">Apakah Anda yakin ingin menghapus produk ini?</p>
+                        <p class="text-muted small">Tindakan ini tidak dapat dibatalkan.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="() => showDeleteModal = false">
+                        <i class="bi bi-x-circle me-1"></i>
+                        Batal
+                    </button>
+                    <button class="btn btn-danger" @onclick="() => DeleteProduk(ProdukModel.Id)" disabled="@isDeleting">
+                        @if(isDeleting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                            <span>Menghapus...</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-trash me-1"></i>
+                            <span>Hapus</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    ProdukVM ProdukModel = new ProdukVM();
+    bool showModal = false;
+    bool showDeleteModal = false;
+    bool isEditMode = false;
+    bool isSaving = false;
+    bool isDeleting = false;
+    string errorMessage = "";
+    string deleteErrorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated())
+        {
+            Navigation.NavigateTo("/login", forceLoad: true);
+            return;
+        }
+
+        await ProdukState.LoadProduksAsync();
+    }
+
+    private void ShowCreateForm()
+    {
+        isEditMode = false;
+        ProdukModel = new ProdukVM();
+        errorMessage = "";
+        showModal = true;
+    }
+
+    private void ShowEditForm(ProdukVM produk)
+    {
+        isEditMode = true;
+        ProdukModel = new ProdukVM
+        {
+            Id = produk.Id,
+            Nama = produk.Nama,
+            Deskripsi = produk.Deskripsi,
+            Harga = produk.Harga,
+            Stok = produk.Stok
+        };
+        errorMessage = "";
+        showModal = true;
+    }
+
+    private void ShowDeleteModal(int id)
+    {
+        ProdukModel.Id = id;
+        deleteErrorMessage = "";
+        showDeleteModal = true;
+    }
+    
+    private async Task SaveProduk()
+    {
+        isSaving = true;
+        errorMessage = "";
+        try
+        {
+            bool success;
+            if (isEditMode)
+            {
+                success = await ProdukService.UpdateProdukAsync(ProdukModel.Id, new ProdukDto
+                {
+                    Nama = ProdukModel.Nama,
+                    Deskripsi = ProdukModel.Deskripsi,
+                    Harga = ProdukModel.Harga,
+                    Stok = ProdukModel.Stok
+                });
+            }
+            else
+            {
+                success = await ProdukService.CreateProdukAsync(new ProdukDto
+                {
+                    Nama = ProdukModel.Nama,
+                    Deskripsi = ProdukModel.Deskripsi,
+                    Harga = ProdukModel.Harga,
+                    Stok = ProdukModel.Stok
+                });
+            }
+
+            if (success)
+            {
+                await ProdukState.LoadProduksAsync();
+                showModal = false;
+            }
+            else
+            {
+                errorMessage = "Gagal menyimpan produk.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Terjadi kesalahan: {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+    
+    private async Task DeleteProduk(int id)
+    {
+        isDeleting = true;
+        deleteErrorMessage = "";
+        try
+        {
+            var success = await ProdukService.DeleteProdukAsync(id);
+            if (success)
+            {
+                await ProdukState.LoadProduksAsync();
+                showDeleteModal = false;
+            }
+            else
+            {
+                deleteErrorMessage = "Gagal menghapus produk.";
+            }
+        }
+        catch (Exception ex)
+        {
+            deleteErrorMessage = $"Terjadi kesalahan: {ex.Message}";
+        }
+        finally
+        {
+            isDeleting = false;
+        }
+    }
+}
