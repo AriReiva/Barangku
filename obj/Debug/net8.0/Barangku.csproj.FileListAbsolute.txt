@@ -5,6 +5,7 @@ D:\8.0 Bentang\Barangku\obj\Debug\net8.0\Barangku.AssemblyInfo.cs
 D:\8.0 Bentang\Barangku\obj\Debug\net8.0\Barangku.csproj.CoreCompileInputs.cache
 D:\8.0 Bentang\Barangku\obj\Debug\net8.0\Barangku.MvcApplicationPartsAssemblyInfo.cs
 D:\8.0 Bentang\Barangku\obj\Debug\net8.0\Barangku.MvcApplicationPartsAssemblyInfo.cache
+D:\8.0 Bentang\Barangku\obj\Debug\net8.0\Barangku.sourcelink.json
 D:\8.0 Bentang\Barangku\bin\Debug\net8.0\appsettings.Development.json
 D:\8.0 Bentang\Barangku\bin\Debug\net8.0\appsettings.json
 D:\8.0 Bentang\Barangku\bin\Debug\net8.0\Barangku.staticwebassets.runtime.json
@@ -146,4 +147,3 @@ D:\8.0 Bentang\Barangku\obj\Debug\net8.0\refint\Barangku.dll
 D:\8.0 Bentang\Barangku\obj\Debug\net8.0\Barangku.pdb
 D:\8.0 Bentang\Barangku\obj\Debug\net8.0\Barangku.genruntimeconfig.cache
 D:\8.0 Bentang\Barangku\obj\Debug\net8.0\ref\Barangku.dll
-D:\8.0 Bentang\Barangku\obj\Debug\net8.0\Barangku.sourcelink.json
